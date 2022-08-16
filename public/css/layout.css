@@ -1,0 +1,91 @@
+h1 {
+    background: currentColor;
+    padding-bottom: 80px;
+    padding-top: 10px;
+    margin-bottom: 60px;
+}
+
+.header {
+    color: white;
+    padding-left: 20px;
+    font-style: oblique;
+    margin-top: 40px;
+}
+
+.thead-tabela-series-topo {
+    background: whitesmoke;
+}
+
+.img-tabela-series {
+    width: 22px;
+    height: 22px;
+}
+
+.thead-tabela-series-footer {
+    background: whitesmoke;
+}
+
+#th-coluna-acoes-tabela-series {
+    text-align: center;
+}
+
+#td-coluna-acoes-tabela-detalhes-series-season {
+    text-align: start;
+}
+
+#td-coluna-acoes-tabela-detalhes-episodes {
+    text-align: end;
+}
+
+#td-coluna-acoes-tabela-series {
+    text-align: end;
+}
+
+#btn-destroy {
+    display: inline !important;
+}
+
+
+#btn-update {
+    display: inline !important;
+}
+
+#tabela-series_length {
+    text-align: start !important
+}
+
+#tabela-series_paginate {
+    text-align: end !important;
+}
+
+#tabela-series_filter {
+    text-align: end !important;
+
+}
+
+#tabela-series_next {
+    padding: 10px !important;
+    background: cadetblue !important;
+    border-radius: 60%;
+    margin: 10px;
+    color: white;
+}
+
+#tabela-series_previous {
+    padding: 10px !important;
+    background: cadetblue !important;
+    border-radius: 60%;
+    margin: 10px;
+    color: white;
+}
+
+
+.paginate_button.current {
+    color: black !important;
+    margin: 5px !important;
+}
+
+body
+{
+    margin-bottom: 100px;
+}
