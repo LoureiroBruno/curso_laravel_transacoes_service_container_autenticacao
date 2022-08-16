@@ -8,9 +8,6 @@ class SeasonsController extends Controller
 {
     public function index(Series $series)
     {
-        /** */
-        // $seasons = $series->seasons;
-
         /** eager loading  */
         $seasons = $series->seasons()->with('episodes')->get();
 
