@@ -247,6 +247,176 @@ public function store(SeriesFormRequestCreate $request)
         return to_route('series.index')->with("Danger", "Erro ao cadastar a série: '{$serie->nome}' com falha transação");
     }
 }
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+================================================================================================================================================================================
+================================================================================================================================================================================
+mod 02
+
+# 
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+## agora é separar uma classe específica para lidar com o banco de dados, Na pasta app ao invés de inserir dentro da pasta "Http", criar uma nova classe dentro da pasta Repositories
+com namespace que vamos nomear de SeriesRepository.
+Isso significa que vai ser uma classe que vai lidar com os detalhes de banco de dados, então, toda responsabilidade de tratar detalhes do banco de dados pode ser inserido nessa classe.
+
+<?php
+
+namespace App\Repositories;
+
+class SeriesRepository
+{
+
+}
+
+criando uma classe nova que vai estar no namespace novo que criamos chamado "Repositories", logo, essa classe é uma classe de repositório.
+significa que vai ser uma classe que vai lidar com os detalhes de banco de dados, então, toda responsabilidade de tratar detalhes do banco de dados pode ser inserido nessa classe.
+Como estamos usando o Eloquente não vamos precisar receber pelo construtor uma conexão com o PDO, por exemplo, é possível usar apenas o Eloquente. 
+Parte do código para extrair em SeriesController.php
+E no arquivo SeriesRepository.php vamos chamar esse método de add e receber o SeriesFormRequest por parâmetro, depois pensamos em como melhorar isso.
+
+class SeriesRepository
+{
+    public function add(SeriesFormRequestCreate $request): Series
+    {
+        return DB::transaction(function () use ($request) {
+       
+            $serie = Series::create($request->all());
+
+            $seasons = [];
+            for ($s=1; $s <= $request->seasonQty; $s++) {
+                $seasons[] = [
+                    'series_id' => $serie->id,
+                    'number' => $s,
+                    'created_at' => $serie->created_at,
+                    'updated_at' => $serie->updated_at
+                ];
+            }
+
+            /** bulk insert */
+            Season::insert($seasons);
+
+            $episodes = [];
+            foreach ($serie->seasons as $season) {
+                for ($e=1; $e <= $request->episodesPerSeason; $e++) {
+                    $episodes[] = [
+                        'season_id' => $season->id,
+                        'number' => $s,
+                    ];
+                }
+            }
+
+            /** bulk insert */
+            Episode::insert($episodes);
+
+            return $serie;
+        });
+
+    }
+}
+
+diferente da ultima alteração do controler SeriesController no metodo Create
+
+public function store(SeriesFormRequestCreate $request)
+{
+    /** inicia a transação */
+    DB::beginTransaction();
+    try {
+        $serie = Series::create($request->all());
+
+        $seasons = [];
+        for ($s=1; $s <= $request->seasonQty; $s++) {
+            $seasons[] = [
+                'series_id' => $serie->id,
+                'number' => $s,
+                'created_at' => $serie->created_at,
+                'updated_at' => $serie->updated_at
+            ];
+        }
+
+        /** bulk insert */
+        Season::insert($seasons);
+
+        $episodes = [];
+        foreach ($serie->seasons as $season) {
+            for ($e=1; $e <= $request->episodesPerSeason; $e++) {
+                $episodes[] = [
+                    'season_id' => $season->id,
+                    'number' => $s,
+                ];
+            }
+        }
+
+        /** bulk insert */
+        Episode::insert($episodes);
+        /** finaliza a transação com sucesso */
+        DB::commit();
+        return to_route('series.index')->with("success", "Cadastrado a série: '{$serie->nome}' com sucesso!");
+
+    } catch (\RuntimeException $serie) {
+        DB::rollBack();
+        return to_route('series.index')->with("Danger", "Erro ao cadastar a série: '{$serie->nome}' com falha transação");
+    }
+}
+
+
+## agora Se estamos adicionando essa série no banco de dados com todas as suas temporadas, episódios e retornando ela dentro da nova Calsse SeriesRepository,
+no controller em SeriesController.php podemos remover a parte do código que colamos no repositório e usar somente ele para isso. Nós poderíamos fazer um 
+new SeriesRepository() mas não vamos fazer dessa forma, vamos utilizar a injeção de dependência, isso significa que vamos solicitar ao Laravel para nos dar esse objeto já criado.
+
+refatorado o metodo store do SeriesController
+
+public function store(SeriesFormRequestCreate $request, SeriesRepository $repository)
+{
+    $serie = $repository->add($request);
+
+    return to_route('series.index')->with("success", "Cadastrado a série: '{$serie->nome}' com sucesso!");
+}
+
+## Se utilizarmos esse repositório em vários métodos, podemos receber no construtor: public function __construtor(){}
+public function __construct(private SeriesRepository $repository)
+{
+    $this->repository = $repository;
+}
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+================================================================================================================================================================================
+================================================================================================================================================================================
+mod 03
+
+# 
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+## 
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+================================================================================================================================================================================
+================================================================================================================================================================================
+mod 04
+
+# 
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+## 
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+================================================================================================================================================================================
+================================================================================================================================================================================
+mod 05
+
+# 
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+## 
+
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ================================================================================================================================================================================

@@ -4,14 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SeriesFormRequestCreate;
 use App\Http\Requests\SeriesFormRequestUpdate;
-use App\Models\Episode;
-use App\Models\Season;
 use App\Models\Series;
+use App\Repositories\SeriesRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class SeriesController extends Controller
 {
+    /**
+     * Undocumented function
+     *
+     * @param SeriesRepository $repository
+     */
+    public function __construct(private SeriesRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * list series function
      *
@@ -46,44 +54,10 @@ class SeriesController extends Controller
      */
     public function store(SeriesFormRequestCreate $request)
     {
-        /** inicia a transação */
-        DB::beginTransaction();
-        try {
-            $serie = Series::create($request->all());
+        /**injeção de dependência - retornar o objeto SeriesRepository criado */
+        $serie = $this->repository->add($request);
 
-            $seasons = [];
-            for ($s=1; $s <= $request->seasonQty; $s++) {
-                $seasons[] = [
-                    'series_id' => $serie->id,
-                    'number' => $s,
-                    'created_at' => $serie->created_at,
-                    'updated_at' => $serie->updated_at
-                ];
-            }
-
-            /** bulk insert */
-            Season::insert($seasons);
-
-            $episodes = [];
-            foreach ($serie->seasons as $season) {
-                for ($e=1; $e <= $request->episodesPerSeason; $e++) {
-                    $episodes[] = [
-                        'season_id' => $season->id,
-                        'number' => $s,
-                    ];
-                }
-            }
-
-            /** bulk insert */
-            Episode::insert($episodes);
-            /** finaliza a transação com sucesso */
-            DB::commit();
-            return to_route('series.index')->with("success", "Cadastrado a série: '{$serie->nome}' com sucesso!");
-
-        } catch (\RuntimeException $serie) {
-            DB::rollBack();
-            return to_route('series.index')->with("Danger", "Erro ao cadastar a série: '{$serie->nome}' com falha transação");
-        }
+        return to_route('series.index')->with("success", "Cadastrado a série: '{$serie->nome}' com sucesso!");
     }
 
     public function destroy(Series $series)
