@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SeriesFormRequestCreate;
 use App\Http\Requests\SeriesFormRequestUpdate;
 use App\Models\Series;
-use App\Repositories\SeriesRepository;
+use App\Repositories\EloquentSeriesRepository;
 use Illuminate\Http\Request;
 
 class SeriesController extends Controller
@@ -15,7 +15,7 @@ class SeriesController extends Controller
      *
      * @param SeriesRepository $repository
      */
-    public function __construct(private SeriesRepository $repository)
+    public function __construct(private EloquentSeriesRepository $repository)
     {
         $this->repository = $repository;
     }

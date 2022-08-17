@@ -254,9 +254,16 @@ public function store(SeriesFormRequestCreate $request)
 ================================================================================================================================================================================
 mod 02
 
-# 
+# Separamos o código que lida com banco de dados em uma classe especializada nisso
+# Criamos uma interface e a implementamos nesta nova classe
+# Aprendemos a lidar com injeção de dependência no Laravel usando o service container
+# Criamos nosso primeiro service provider
 
 -----------------------------------------------------------------------------------------------------------------------------------
+
+------
+02
+------
 
 ## agora é separar uma classe específica para lidar com o banco de dados, Na pasta app ao invés de inserir dentro da pasta "Http", criar uma nova classe dentro da pasta Repositories
 com namespace que vamos nomear de SeriesRepository.
@@ -381,7 +388,67 @@ public function __construct(private SeriesRepository $repository)
     $this->repository = $repository;
 }
 
+------
+04
+------
+
+## Então, no nop 02 já melhoramos o código fazendo com que o controller passe a responsabilidade de adicionar uma série para o repositório de séries , ou seja, para uma classe 
+especializada em tratar séries no banco de dados. Assim, já melhoramos o código, o controller está bem mais sucinto e isso é bem interessante.
+## Só que temos um problema, estamos recebendo o repositório SeriesRepository, agora imagina que mais para frente não queremos mais utilizar o Eloquente e sim diretamente com o 
+PDO ou outro ORM como o Doctrine, por exemplo. Então, teríamos muito mais trabalho da forma como foi implementada. 
+# visto que essas discussões são importantes e são bastante citadas em treinamentos mais focados em arquitetura de software e design de código. 
+**  no treinamento de PHP e Clean Architecture: descomplicando arquitetura de software
+capítulo específico sobre repositórios, aprendemos como lidar com repositórios, em qual camada de uma arquitetura costumam ficar e criamos interfaces para os repositórios. 
+Também implementamos com PDO e uma implementação em memória e deixamos um desafio para utilizar o Doctrine
+
+** Esse tipo de separação ajuda bastante quando vamos utilizar o Domain Driven Design, que também temos um curso na Alura, o PHP e Domain Driven Design: apresentando os conceitos 
+que é quando queremos ter um domínio mais expressivo de como o código interage com o mundo real. Nesse curso também utilizamos no código os repositórios. 
+Então, o fato de usar repositórios no nosso código, está dando uma pequena vantagem de melhoria, mas, quando estudamos mais sobre os padrões e arquiteturas, 
+notamos que existem vários outros ganhos. 
+
+## Agora, vamos criar uma nova interface como o nome SeriesRepository e renomear o repositório de SeriesRepository para EloquentSeriesRepository, e essa classe extender de SeriesRepository
+assim, caso queria usar o Doctrine ao inves do Eloquent, cria uma nova classe DctrineSeriesRepository e implementando da interface SeriesRepository mas com codigo correspondente do Doctine
+
+## Mas como o Laravel vai saber qual implementação dessa interface ele vai criar? 
+o Laravel que sempre que alguém precisar da interface SeriesRepository, por enquanto, entrega a classe EloquentSeriesRepository
+Se mais para frente mudarmos de implementação, vamos informar para o Laravel que quando solicitarem a interface SeriesRepository você entrega essa outra classe, e 
+todos os códigos que utilizam a interface SeriesRepository não precisam ser modificados. Então, vamos ensinar o Laravel a criar uma instância de algum tipo, no caso uma interface
+
+----------------------------------
+06
+----------------------------------
+
+
+## Existe no Laravel o service container (ou em português, Container de Serviço) e a partir dele temos o service provider (ou em português, provedor de serviço)
+
+## Exemplificando, se em SeriesController esperamos uma instância, é o service container que vai analisar o que precisamos e entregar.
+Ele cria para nós e injeta, seja no construtor ou em cada uma das ações ao longo do código. Ele que cria o request, qualquer dependência, etc. O service container que permite a injeção de dependência,
+contudo, além disso, no Laravel temos o service providers
+
+
+-- Basicamente queremos informar que quando precisar da interface SeriesRepository é para criar a implementação da classe concreta do EloquentSeriesRepository
+1 - php artisan make:provider SeriesRepositoryProvider (criando um provedor de repositório de séries)
+2 - configurar dentro da classe SeriesRepositoryProvider
+
+class SeriesRepositoryProvider extends ServiceProvider
+{
+    /**
+     * Register services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->bind(SeriesRepository::class, EloquentSeriesRepository::class);
+    }
+}
+
+que sempre que precisar de uma instância do tipo SeriesRepository, instancie o EloquentSeriesRepository, o service container sabe o que deve ser feito para isso
+
+obs: mas precisar registar esse provider, pasta config vamos selecionar o arquivo app.php que é a configuração da aplicação, vamos encontrar a chave providers
+adicionar o \App\Providers\SeriesRepositoryProvider::class,.
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 ================================================================================================================================================================================
 ================================================================================================================================================================================
