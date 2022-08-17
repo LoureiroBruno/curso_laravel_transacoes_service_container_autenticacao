@@ -48,39 +48,42 @@ class SeriesController extends Controller
     {
         /** inicia a transação */
         DB::beginTransaction();
-        $serie = Series::create($request->all());
+        try {
+            $serie = Series::create($request->all());
 
-        $seasons = [];
-        for ($s=1; $s <= $request->seasonQty; $s++) {
-            $seasons[] = [
-                'series_id' => $serie->id,
-                'number' => $s,
-                'created_at' => $serie->created_at,
-                'updated_at' => $serie->updated_at
-            ];
-        }
-
-        /** bulk insert */
-        Season::insert($seasons);
-
-        $episodes = [];
-        foreach ($serie->seasons as $season) {
-            for ($e=1; $e <= $request->episodesPerSeason; $e++) {
-                $episodes[] = [
-                    'season_id' => $season->id,
+            $seasons = [];
+            for ($s=1; $s <= $request->seasonQty; $s++) {
+                $seasons[] = [
+                    'series_id' => $serie->id,
                     'number' => $s,
+                    'created_at' => $serie->created_at,
+                    'updated_at' => $serie->updated_at
                 ];
             }
+
+            /** bulk insert */
+            Season::insert($seasons);
+
+            $episodes = [];
+            foreach ($serie->seasons as $season) {
+                for ($e=1; $e <= $request->episodesPerSeason; $e++) {
+                    $episodes[] = [
+                        'season_id' => $season->id,
+                        'number' => $s,
+                    ];
+                }
+            }
+
+            /** bulk insert */
+            Episode::insert($episodes);
+            /** finaliza a transação com sucesso */
+            DB::commit();
+            return to_route('series.index')->with("success", "Cadastrado a série: '{$serie->nome}' com sucesso!");
+
+        } catch (\RuntimeException $serie) {
+            DB::rollBack();
+            return to_route('series.index')->with("Danger", "Erro ao cadastar a série: '{$serie->nome}' com falha transação");
         }
-
-        /** bulk insert */
-        Episode::insert($episodes);
-        /** finaliza a transação com sucesso */
-        DB::commit();
-        
-        return to_route('series.index')->with("success", "Cadastrado a série: '{$serie->nome}' com sucesso!");
-
-        DB::rollBack();
     }
 
     public function destroy(Series $series)
