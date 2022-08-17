@@ -6,7 +6,73 @@ mod 01
 -----------------------------------------------------------------------------------------------------------------------------------
 
 
-## 
+## bulk insert, para inserirmos vários dados de uma vez só em uma única query (consulta). 
+## par resolver problemas de inconsistência é através de transações $pdo->beginTrasaction() e $pdo->commit(), é utilizando as facades DB, DB::transaction()
+Essa função espera por parâmetro uma closure, função anônima e tudo que inserimos nela vai ocorrer dentro de uma transação, isto é, se fizermos um insert, um delete, um update, 
+tudo isso vai estar dentro de uma única transação. 
+
+public function store(SeriesFormRequest $request)
+{
+    DB::transaction(function () {
+
+    });
+}
+
+## facade de DB usamos a função transaction() e ela possui algumas particularidades. 
+## A primeira, é que ela recebe, além dessa closure, um segundo parâmetro, quando trabalhamos com transações pode ocorrer deadlock, isto é, se uma transação depende de duas tabelas e 
+outra transação depende de outras duas tabelas, só que uma delas é igual. 
+Por exemplo, a primeira transação depende da tabela de episódios, a segunda transação usa a de episódios mas depende da de temporadas que a primeira transação ainda está dependendo. 
+Basicamente, é como se você perguntasse para a sua mãe, se você pode sair e ela responde para você verificar com o seu pai, e ao perguntar para o pai, ele informa para você verificar com a mãe. 
+Isso é um deadlock e quando trabalhamos com transações, isso pode acontecer.
+Então podemos informar para o Laravel tentar executar novamente essa transação em caso de deadlock, por exemplo, se quisermos tentar cinco vezes se houver deadlock, basta passarmos o 
+parâmetro cinco Episode::insert($episodes); }, attempts:5);.
+
+## A segunda, Não precisamos iniciar a variável serie em um estado inválido, passar por referência, &$serie, etc.
+pós o Episode::insert($episodes); vamos digitar return $serie;
+Agora o que a função transaction() vai fazer é pegar o retorno de toda a função
+pegar o retorno da série incluindo $serie = antes de DB::transaction(function () use ($request), isto é, temos as séries em mãos e podemos acessar o nome dela.
+
+$serie = DB::transaction(function () use ($request)
+
+public function store(SeriesFormRequestCreate $request)
+{
+    /** obtém o return $series */
+    $serie = DB::transaction(function () use ($request){
+        
+        $serie = Series::create($request->all());
+
+        $seasons = [];
+        for ($s=1; $s <= $request->seasonQty; $s++) {
+            $seasons[] = [
+                'series_id' => $serie->id,
+                'number' => $s,
+                'created_at' => $serie->created_at,
+                'updated_at' => $serie->updated_at
+            ];
+        }
+
+        /** bulk insert */
+        Season::insert($seasons);
+
+        $episodes = [];
+        foreach ($serie->seasons as $season) {
+            for ($e=1; $e <= $request->episodesPerSeason; $e++) {
+                $episodes[] = [
+                    'season_id' => $season->id,
+                    'number' => $s,
+                ];
+            }
+        }
+
+            /** bulk insert */
+        Episode::insert($episodes);
+
+        return $serie;
+    });
+
+    return to_route('series.index')->with("success", "Cadastrado a série: '{$serie->nome}' com sucesso!");
+}
+
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ================================================================================================================================================================================

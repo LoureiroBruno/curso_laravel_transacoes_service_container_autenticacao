@@ -8,6 +8,7 @@ use App\Models\Episode;
 use App\Models\Season;
 use App\Models\Series;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SeriesController extends Controller
 {
@@ -45,31 +46,39 @@ class SeriesController extends Controller
      */
     public function store(SeriesFormRequestCreate $request)
     {
-        $serie = Series::create($request->all());
-
-        $seasons = [];
-        for ($s=1; $s <= $request->seasonQty; $s++) {
-            $seasons[] = [
-                'series_id' => $serie->id,
-                'number' => $s,
-                'created_at' => $serie->created_at,
-                'updated_at' => $serie->updated_at
-            ];
-        }
-
-        Season::insert($seasons);
-
-        $episodes = [];
-        foreach ($serie->seasons as $season) {
-            for ($e=1; $e <= $request->episodesPerSeason; $e++) {
-                $episodes[] = [
-                    'season_id' => $season->id,
+        /** obtém o return $series */
+        $serie = DB::transaction(function () use ($request){
+            
+            $serie = Series::create($request->all());
+    
+            $seasons = [];
+            for ($s=1; $s <= $request->seasonQty; $s++) {
+                $seasons[] = [
+                    'series_id' => $serie->id,
                     'number' => $s,
+                    'created_at' => $serie->created_at,
+                    'updated_at' => $serie->updated_at
                 ];
             }
-        }
+    
+            /** bulk insert */
+            Season::insert($seasons);
+    
+            $episodes = [];
+            foreach ($serie->seasons as $season) {
+                for ($e=1; $e <= $request->episodesPerSeason; $e++) {
+                    $episodes[] = [
+                        'season_id' => $season->id,
+                        'number' => $s,
+                    ];
+                }
+            }
+    
+             /** bulk insert */
+            Episode::insert($episodes);
 
-        Episode::insert($episodes);
+            return $serie;
+        });
 
         return to_route('series.index')->with("success", "Cadastrado a série: '{$serie->nome}' com sucesso!");
     }
