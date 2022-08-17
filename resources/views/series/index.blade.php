@@ -93,7 +93,7 @@
                     "infoFiltered": "(filtrado de _MAX_ registros no total)",
                         "paginate": {
                         "previous": "Voltar",
-                        "next": "Próximo"
+                        "next": "Avançar"
                     }
                 },
         });

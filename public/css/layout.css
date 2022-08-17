@@ -65,18 +65,24 @@ h1 {
 
 #tabela-series_next {
     padding: 10px !important;
-    background: cadetblue !important;
-    border-radius: 60%;
+    background: indianred !important;
+    border-radius: 100%;
     margin: 10px;
     color: white;
+    text-transform: uppercase;
+    text-decoration: burlywood;
+    cursor: pointer
 }
 
 #tabela-series_previous {
     padding: 10px !important;
-    background: cadetblue !important;
-    border-radius: 60%;
+    background: indianred !important;
+    border-radius: 100%;
     margin: 10px;
     color: white;
+    text-transform: uppercase;
+    text-decoration: burlywood;
+    cursor: pointer
 }
 
 
