@@ -3,7 +3,7 @@
         Series - Alterar Item
         </x-slot>
         <x-slot:header>
-            Editar Séries: {{ $series->nome }}
+            Editar - {{ $series->nome }}
             </x-slot>
             <form action="{{ route('series.update', $series->id) }}" method="POST">
                 @csrf

@@ -4,7 +4,7 @@
         {{ __('messages.app_name') }}
         </x-slot>
         <x-slot:header>
-            Listar Séries
+            Exibir todas as Séries 
             </x-slot>
 
             <a href="{{ route('series.create') }}" class="btn btn-warning mb-4" tabindex="-1" role="button"

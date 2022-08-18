@@ -31,10 +31,12 @@ h1 {
 
 #td-coluna-acoes-tabela-detalhes-series-season {
     text-align: start;
+    padding-top: 10px;
 }
 
 #td-coluna-acoes-tabela-detalhes-episodes {
     text-align: end;
+    padding-top: 10px;
 }
 
 #td-coluna-acoes-tabela-series {
@@ -94,4 +96,15 @@ h1 {
 body
 {
     margin-bottom: 100px;
+}
+
+#bg-tabela-series-episodes
+{
+    font-size: medium;
+}
+
+#checkbox-tabela-series-episodes {
+    min-width: 20px;
+    min-height: 20px;
+    margin-right: 5px;
 }

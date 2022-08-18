@@ -4,8 +4,11 @@
         {{ __('messages.app_name') }}
         </x-slot>
         <x-slot:header>
-            Detalhes Série: {{ $series->nome }}
-
+            Todas as Temporadas de {{ $series->nome }}
+            @php
+                // dd($series->id);
+                // dd($series);
+            @endphp
             </x-slot>
             <table class="table table-sm">
                 <thead class="thead-tabela-series-topo">
@@ -17,10 +20,13 @@
                 <tbody class="table-light">
                     @foreach ($seasons as $season)
                         <tr>
-                            <td id="td-coluna-acoes-tabela-detalhes-series-season"><strong>{{ $season->number }}° </strong><i>Temporada</i></td>
+                            <td id="td-coluna-acoes-tabela-detalhes-series-season"><a href="{{ route('episodes.index', $season->id) }}" class="btn btn-warning btn-sm mb-2" tabindex="-1" role="button"
+                                aria-disabled="true" title="Registrar os episódios">
+                                <strong>{{ $season->number }}° </strong><i>Temporada</i></a>
+                            </td>
                             <td id="td-coluna-acoes-tabela-detalhes-episodes">
-                                <span class="badge bg-primary">
-                                    Epsódios {{ $season->episodes->count() }}
+                                <span id="bg-tabela-series-episodes" class="badge bg-danger">
+                                    {{ $season->episodes->count() }}
                                 </span>
                             </td>
                         </tr>
@@ -39,10 +45,8 @@
             <div class="col-auto">
                 <a href="{{ route('series.index') }}" class="btn btn-outline-danger btn-sm mb-3 ms-2" tabindex="-1"
                     role="button" aria-disabled="true" title="Cancelar">
-                    <img src="{{ asset('img/send.svg') }}" />
-                    Voltar
+                    <img src="{{ asset('img/x-lg.svg') }}" />
+                    Fechar
                 </a>
             </div>
 </x-layout>
-
-

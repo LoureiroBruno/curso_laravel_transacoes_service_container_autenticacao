@@ -458,7 +458,11 @@ mod 03
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
-## 
+## php artisan make:migration --table=episodes, já podemos informar para qual tabela estamos criando essa migration que vai ser a episode. 
+Só que, é preciso informar também o nome, vamos chamar de "add_watched_apisodes", adicionar a coluna watched de episódio.
+# php artisan make:migration --table=episodes add_watched_apisodes
+Repare que já temos um Schema::table, esse é o método que usamos quando queremos alterar uma tabela e não criar uma nova e dentro vamos inserir que da tabela queremos adicionar uma coluna do tipo booleano,
+$table->boolean(), isto é, verdadeiro ou falso. O nome vai ser watched. 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
