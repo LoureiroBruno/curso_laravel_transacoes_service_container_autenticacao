@@ -23,9 +23,9 @@ class UsersController extends Controller
         
         /** pega o resultado $user e torna-lo logado*/
         Auth::login($user);
-
+    
         /** usuário criado dao um redirecionamento para series.index */
-        return to_route('series.index')->with('success', 'Logado com sucessso!');
+        return to_route('series.index');
 
     }
 }

@@ -17,21 +17,18 @@
     <script type="text/javascript" href="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
 
 </head>
-
 <nav class="navbar navbar-expand-lg bg-secondary">
     <div class="container-md">
         <a href="{{ route('series.index') }}" class="btn btn-outline-light mb-4" tabindex="-1" role="button"
-        aria-disabled="true" title="Criar Nova Série">Home</a>
-        
+            aria-disabled="true" title="Criar Nova Série">Home</a>
+
         <a href="{{ route('logout') }}" class="btn btn-outline-light mb-4" tabindex="-1" role="button"
-        aria-disabled="true" title="Criar Nova Série">Sair</a>
+            aria-disabled="true" title="Criar Nova Série">Sair</a>
     </div>
 </nav>
 
 <body>
     <div class="container">
-        
-
         <h1>
             <p class="header">{{ $header }}</p>
         </h1>

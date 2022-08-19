@@ -535,7 +535,10 @@ public function update(Request $request, Season $season)
 ================================================================================================================================================================================
 mod 04
 
-# 
+# Entendemos o que é e criamos um middleware
+# Definimos nossas regras para realizar login
+# Criamos o cadastro de usuário
+# Implementamos um logout
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -681,7 +684,7 @@ mod 05
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
-## 
+##  aprender formas diferentes de aplicar um middleware nas URLs, ->middleware(\App\Http\Middleware\Autenticador::class);, seja através do controller, de um grupo de rotas ou agrupando de outras formas
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -18,7 +18,9 @@ class LoginController extends Controller
             return redirect()->back()->withErrors('Usuário ou senha inválidos');
         }
 
-        return to_route('series.index')->with('success', 'Logado com sucessso!');
+        $user = Auth::user();
+        $usuario = $user['name'];
+        return to_route('series.index')->with('success', "Usuário(a) $usuario logado com sucessso!");
     }
 
     public function destroy(Request $request)

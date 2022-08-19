@@ -9,6 +9,14 @@ h1 {
     margin-bottom: 60px;
 }
 
+.h1-header-user {
+    display: inline-flex;
+}
+
+#id-user {
+    text-align: end;
+}
+
 .header {
     color: white;
     padding-left: 20px;
