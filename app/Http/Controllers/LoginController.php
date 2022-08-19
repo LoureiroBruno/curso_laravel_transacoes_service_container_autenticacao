@@ -12,12 +12,19 @@ class LoginController extends Controller
         return view('login.index');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): string
     {
         if (!Auth::attempt($request->only(['email', 'password']))) {
             return redirect()->back()->withErrors('Usuário ou senha inválidos');
         }
 
         return to_route('series.index')->with('success', 'Logado com sucessso!');
+    }
+
+    public function destroy(Request $request)
+    {   
+        Auth::logout();
+
+        return to_route('login');
     }
 }

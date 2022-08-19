@@ -8,7 +8,8 @@
     <title>{{ $title }}</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+        crossorigin="anonymous"></script>
     {{-- css - DataTables --}}
     <script type="stylesheet" src="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css"></script>
     {{-- js - DataTables --}}
@@ -17,8 +18,20 @@
 
 </head>
 
+<nav class="navbar navbar-expand-lg bg-secondary">
+    <div class="container-md">
+        <a href="{{ route('series.index') }}" class="btn btn-outline-light mb-4" tabindex="-1" role="button"
+        aria-disabled="true" title="Criar Nova Série">Home</a>
+        
+        <a href="{{ route('logout') }}" class="btn btn-outline-light mb-4" tabindex="-1" role="button"
+        aria-disabled="true" title="Criar Nova Série">Sair</a>
+    </div>
+</nav>
+
 <body>
     <div class="container">
+        
+
         <h1>
             <p class="header">{{ $header }}</p>
         </h1>
