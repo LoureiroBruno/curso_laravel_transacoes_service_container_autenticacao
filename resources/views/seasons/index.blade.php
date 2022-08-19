@@ -5,16 +5,15 @@
         </x-slot>
         <x-slot:header>
             Todas as Temporadas de {{ $series->nome }}
-            @php
-                // dd($series->id);
-                // dd($series);
-            @endphp
+            {{-- @php
+                dd($seasons);
+            @endphp --}}
             </x-slot>
             <table class="table table-sm">
                 <thead class="thead-tabela-series-topo">
                     <tr class="th-tabela-series">
                         <th scope="col" id="td-coluna-acoes-tabela-detalhes-series-season">Lançamento de ({{ count($seasons)}}) Temporada(s)</th>
-                        <th scope="col"  id="td-coluna-acoes-tabela-detalhes-episodes">Episódios por Temporada</th>
+                        <th scope="col"  id="td-coluna-acoes-tabela-detalhes-episodes">Total de ({{ $seasons[0]->episodes->count() }}) Episódio(s)</th>
                     </tr>
                 </thead>
                 <tbody class="table-light">
@@ -26,7 +25,7 @@
                             </td>
                             <td id="td-coluna-acoes-tabela-detalhes-episodes">
                                 <span id="bg-tabela-series-episodes" class="badge bg-danger">
-                                    {{ $season->episodes->count() }}
+                                 {{ $season->numberOfWatchedEpisodes() }} | {{ $season->episodes->count() }}
                                 </span>
                             </td>
                         </tr>
@@ -35,7 +34,7 @@
                 <thead class="thead-tabela-series-topo">
                     <tr class="th-tabela-series">
                         <th scope="col" id="td-coluna-acoes-tabela-detalhes-series-season">Lançamento de ({{ count($seasons)}}) Temporada(s)</th>
-                        <th scope="col"  id="td-coluna-acoes-tabela-detalhes-episodes">Episódios por Temporada</th>
+                        <th scope="col"  id="td-coluna-acoes-tabela-detalhes-episodes">Total de ({{ $seasons[0]->episodes->count() }}) Episódio(s)</th>
                     </tr>
                 </thead>
             </table>

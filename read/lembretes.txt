@@ -454,9 +454,18 @@ adicionar o \App\Providers\SeriesRepositoryProvider::class,.
 ================================================================================================================================================================================
 mod 03
 
-# 
+# Praticamos vários conhecimentos ao implementar a funcionalidade de assistir episódios
+# Vimos como definir um valor padrão para uma coluna em uma migration
+# Conhecemos os métodos each das coleções e push das models do Eloquent
+# Utilizamos um escopo para buscar os episódios assistidos, depois otimizamos isso usando as coleções
 
 -----------------------------------------------------------------------------------------------------------------------------------
+
+----------------------------------
+04
+----------------------------------
+
+## criarem uma nova migration para adicionar uma coluna que permita que na tabela de episódios seja guardado a informação se foi assistido ou não
 
 ## php artisan make:migration --table=episodes, já podemos informar para qual tabela estamos criando essa migration que vai ser a episode. 
 Só que, é preciso informar também o nome, vamos chamar de "add_watched_apisodes", adicionar a coluna watched de episódio.
@@ -464,6 +473,62 @@ Só que, é preciso informar também o nome, vamos chamar de "add_watched_apisod
 Repare que já temos um Schema::table, esse é o método que usamos quando queremos alterar uma tabela e não criar uma nova e dentro vamos inserir que da tabela queremos adicionar uma coluna do tipo booleano,
 $table->boolean(), isto é, verdadeiro ou falso. O nome vai ser watched. 
 
+public function up()
+{
+    Schema::table('episodes', function (Blueprint $table) {
+        $table->boolean('watched')->default(false);
+    });
+}
+
+default(false), ou seja, ao criar essa coluna já estamos informando para o próprio banco de dados que, por padrão, essa coluna tem um valor falso, o episódio não foi assistido.
+
+Sendo assim, todos os episódios que já estão no banco terão esse valor como falso a partir de agora. Então, vamos criar também a forma de desfazer essa migration que é através de um dropColumn, com isso é removida a coluna watched.
+
+public function down()
+{
+    Schema::table('episodes', function (Blueprint $table) {
+        $table->dropColumn('watched');
+    });
+}
+
+para que as alterações sejam repassadas ao banco, php artisan migrate para ver se o campo será criado.
+
+----------------------------------
+05
+----------------------------------
+
+criado a nova rota, Route::post('/seasons/{season}/episodes', [EpisodesController::class, 'update'])->name('episodes.update');
+e add um novo metodo update no controllerEpisodes, recebendo por parametro Request $request, Season $season
+
+## O que queremos fazer é pegar os episódios assistidos, watchedEpisodes, que vão estar em request->episodes, pronto, esses são os episódios assistidos, 
+$watchedEpisodes = $request->episodes; os que enviamos pelo post. 
+A partir desses episódios assistidos queremos marcar a propriedade watched como "true" se o episódio estiver selecionado no array, ou seja, vamos percorrer todos os episódios da temporada, 
+$season->episodes, e para cada um deles vamos executar uma função. 
+Repare que as collections do Laravel possuem o método each(), que para cada item dessa coleção podemos executar uma função. 
+Por parâmetro da função vamos receber o episódio. Recapitulando, para cada um desses episódios da temporada, vamos executar a função, function (Episode $episode){}, que recebe cada um desses 
+episódios. Assim, esse episódio vamos marcar como assistido, watched, se o ID desse episódio estiver no array de episódios assistidos watchedEpisodes, que é o array de IDs na aplicação 
+que aparece para nós.
+
+public function update(Request $request, Season $season)
+{
+        $watchedEpisodes = $request->episodes;
+        $season->episodes->each(function (Episode $episode) use ($watchedEpisodes) { // visto que essa variável não existe dentro da closure, assim, vamos realizar o uso dela, use ($watchedEpisodes).
+        $episode->watched = in_array($episode->id, $watchedEpisodes);
+        });
+}
+
+ podemos inserir o $season->push();, que pega todos os episódios e salvar, visto que o método push() faz é salvar a model em questão, no caso a $season e todos os seus relacionamentos,
+ ntão, como existem alterações nesses relacionamentos, nos episodes, o push vai salvar nos episódios.
+
+
+public function update(Request $request, Season $season)
+{
+        $watchedEpisodes = $request->episodes;
+        $season->episodes->each(function (Episode $episode) use ($watchedEpisodes) {
+        $episode->watched = in_array($episode->id, $watchedEpisodes);
+        });
+        $season->push();
+}
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ================================================================================================================================================================================
@@ -474,8 +539,138 @@ mod 04
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
-## 
+## r permitir acesso à aplicação somente aos usuários registrados e quando criamos um projeto usando o Laravel, já temos algumas funcionalidades relacionadas ao usuário
+No arquivo user.php já temos o fillable o nome, o e-mail e a senha, temos detalhes de campos escondidos em $hidden, os cats que podemos fazer ou seja temos algumas coisas já prontas.
 
+Inclusive, temos também em "database > migrations", migrations já prontas para a tabela de usuários.
+Já temos então uma estrutura pronta para trabalharmos com autenticação so rodar o comando migrate
+
+## O que queremos fazer basicamente é que quando formos acessar alguma URL, por exemplo, barra '/', /series, /series/19 ou /seasons, isto é, quando acessar alguma URL, que vamos definir, 
+antes de chegar no controller queremos verificar se o usuário da logado ou não
+O Laravel possui um sistema de autenticação bastante completo e, por sua vez, complexo, então, conseguimos fazer bastante coisa. Mas, para o que fazer, vamos poder usar novamente as facades, 
+ou seja, existem facilidades de autenticação que vamos utilizar. Mas, basicamente o que o Laravel tem para qualquer sistema de autenticação são: os guards (ou em português, guardas), 
+sendo uma forma de verificar quem é o usuário e os providers, que é uma maneira de encontrar determinado usuário.
+
+## Os guards definem como esses usuários são autenticados a cada requisição, que é como vamos identificar o usuário. O Laravel, por exemplo, já vem com o guard de session, 
+isto é, podemos armazenar um usuário em sessão, que é inclusive dessa forma que faremos, por enquanto.
+
+## E o provider é como o usuário vai ser recuperado de algum lugar, seja de uma API, de um banco de dados, de um arquivo ou da memória. Basicamente é assim que funciona o sistema do Laravel. 
+Então, podemos verificar se um usuário está logado ou não antes de executar o código no controller, por exemplo. 
+
+## no exemplo de modo de uso,
+Vamos em "app > Http > Controllers > SeriesController.php", na index poderíamos verificar antes de acessar a lista de séries se o usuário está logado e para isso vamos usar o Auth::check(),
+repare que o auth vem da importação das facades e o método check() nos retorna um booleano, que vai retornar verdadeiro se tiver algum usuário logado.
+
+exemplo: o usuário vai estar logado se tiver alguma informação salva em sessão e retorna falso se não tiver nenhum usuário logado.
+
+public function index(Request $request)
+{
+    add(Auth::check()); => exibido falsse neste exemplo
+    $series = Series::all();
+    $mensagemSucesso = session('mensagem.sucesso');
+
+    return view('series.index')->with('series', $series)->with('mensagemSucesso', $mensagemSucesso);
+}
+
+
+podemos fazer um if, se este usuário está logado, então, vai executar tudo, ou melhor ainda, se o usuário não estiver logado, !Auth::check();, 
+podemos lançar uma exceção AuthenticationException() que já tem aqui uma exceção específica de autenticação.
+
+public function index(Request $request)
+{
+        if (!Auth::check()) {
+            throw new AuthenticationException(); => como lançamos uma exceção de autenticação, o Laravel sabe que deve redirecionar o usuário para a rota de login, mas não temos nenhuma rota de login definida. 
+        }
+        $series = Series::all();
+        $mensagemSucesso = session('mensagem.sucesso');
+
+return view('series.index')->with('series', $series)->with('mensagemSucesso', $mensagemSucesso);
+
+}
+
+## para que essa verificação seja essa aplicada a cada controller, repetindo o código, ou usando na verificação dentro do arquivo de rota, podemos usar Middlewares
+# php artisan make:middleware Autenticador 
+
+criar um middleware do tipo de autenticação.
+
+## o Middlewares tem a funcionalidade, como um interceptor da requisição que pode tanto transformar a requisição quanto transformar a resposta. 
+lado esquerdo da tela em "app > Http > Middleware" foi criado o Autenticador.php. o middleware só precisa de um método handle que recebe uma requisição que vamos receber, 
+Request $request, e algo que vai ser executado, Closure $next. Esse next pode ser outro middleware , assim, podemos ter vários sendo executados ou pode ser a ação do controller, 
+é o Laravel que vai cuidar dessa parte.
+
+## Então, basicamente podemos inserir o que quisermos, podemos tratar a requisição antes e pegar a resposta e executar o que quiser antes de retornar também. 
+Podemos tratar tanto a requisição quanto a resposta em um middleware
+
+## então pra qual foi o motivo de ter criado o middleware, o caso, o que queremos é verificar se o usuário não está logado, 
+então, !Auth::check() e lançar a exceção AuthenticationException(). Assim, se o usuário não estiver logado será redirecionado para a tela de login.
+
+public function handle(Request $request, Closure $next)
+{
+    if (!Auth::check()) {
+        throw new AuthenticationException();
+    }
+
+    return $next($request);
+}
+
+## observação
+apos criar o middleware dever ser usando em algum lugar, e vamos passar a usar ele em um único lugar, por enquanto, sendo nas rotas, em "routes > web.php".
+Exemplo:
+
+Route::get('/', function () {
+    return redirect('/series');
+})->middleware(\App\Http\Middleware\Autenticador::class);
+
+## Agora quando acessarmos "/series" na aplicação o autenticador não vai entrar em ação, mas quando acessar "/" ele vai entrar em ação e tentar redirecionar o usuário para a rota de login,
+
+
+----------------------------------
+04
+----------------------------------
+
+## criado a rota e a view login recebendo os dados vindo do form, criando o controler store no LoginCrontroller com o metod de index visualizar view login
+
+## No corpo do método queremos tentar pegar o usuário e senha para fazermos um Auth::attempt(); perceba que ele espera por parâmetro credenciais do usuário. 
+Assim, podemos passar o request->all(), vamos ver o que isso vai nos retornar incluindo um dd antes: dd(Auth::attempt($request->all()));, quando tentarmos realizar o 
+login com o attempt passando o $request->all() é esperado receber um retorno falso, visto que ele retorna "verdadeiro" em caso de sucesso e "falso" em caso de erro.
+
+   public function store(Request $request) 
+    {
+        dd(Auth::attempt($request->all()));
+    }
+
+criando a rota de post envio dos dados form login
+
+## A princípio o código já está funcionando, repare o quanto é simples realizarmos login, é basicamente a chamada de um método attempt. De novo, estamos usando uma facade que fornece 
+um subsistema para nós, no caso, de autenticação, então, esse attempt está realizando várias coisas por trás.
+O attempt tenta buscar o usuário, se for encontrado vamos tentar efetuar o login dele, como vai ser feito o login verificando se a senha está correta com todos os hash, se a senha está 
+correta e o usuário estiver válido, ele armazena o usuário em sessão. Se estiver armazenado em sessão, ao chegar no middleware de autenticador, o check vai retornar "verdadeiro".
+
+----------------------------------
+06
+----------------------------------
+
+## realizando o botao de cadastro ns view de login com href na rota users.create e desta rota ao respectivo controller e na model de Users
+criado a view, rota, controler e metodo teoricamente o formulário está pronto,
+ Agora na aplicação vamos atualizar e note que aparece os campos para preencher de "Nome", ""E-mail" e "Senha" com o botão "Registrar".
+ The POST method is not supported for this route. Supported methods:Get,HEAD
+Route::post('/register', [UsersController::class, 'store'])->name('users.store');
+aqui nós deveríamos ter a validação, criar umform request separado, caso queira pode fazer um $request->valid direto, não vou adicionar validação, mas lembrem-se que isso é um problema, 
+nós deveríamos validar.
+
+Mas pegando todas as requisições $data = $request, só que tirando o token visto que não precisamos usar o token que vem da proteção de 
+CSRF, ->except(['_token']);. 
+poderíamos criar um user create com esses dados User::create($data)
+Assim, 
+em data ['password'] poderíamos muito bem fazer um password_hash da senha: $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT); 
+ou 
+['password'] poderíamos muito bem fazer um password_hash da senha: $data['password'] = password_hash($request->password, PASSWORD_DEFAULT); 
+com isso, já estaríamos protegidos. 
+Mas, ao invés de usar as funções diretamente do PHP, vamos utilizar outra facade que é a de Hash::make. Existe essa facade de hash e o que ela faz por trás é usar as funções do PHP, adicionando algumas configurações. 
+$data = $request->except(['_token']);
+$data['password'] = Hash::make($data['password']);
+User::create($data);
+ Existe essa facade de hash e o que ela faz por trás é usar as funções do PHP, adicionando algumas configurações. 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ================================================================================================================================================================================

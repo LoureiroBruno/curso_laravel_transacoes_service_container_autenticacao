@@ -108,3 +108,7 @@ body
     min-height: 20px;
     margin-right: 5px;
 }
+
+.form-group {
+    padding-bottom: 10px;
+}

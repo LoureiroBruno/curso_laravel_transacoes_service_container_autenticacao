@@ -1,0 +1,35 @@
+.login-registro {
+    padding-top: 50px;
+}
+
+.login-registro-form {
+    color: rgb(198, 159, 159);
+    font-family: monospace;
+}
+
+a {
+    color: #fff;
+    padding: 5px 10px;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.header {
+    text-align: center;
+    font-size: larger;
+    color: beige; 
+}
+
+body {
+    padding: 100px;
+    background: currentColor;
+}
+
+.container {
+    text-align: center;
+    width: 60%;
+}
+
+.form-group {
+    color: beige;
+}

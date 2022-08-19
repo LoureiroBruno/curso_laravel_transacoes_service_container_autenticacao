@@ -34,4 +34,9 @@ class Season extends Model
         /** A temporada possue muitos epsodios  */
         return $this->hasMany(related: Episode::class);
     }
+
+    public function numberOfWatchedEpisodes(): int
+    {
+        return $this->episodes->filter(fn ($episodes) => $episodes->watched)->count();
+    }
 }
