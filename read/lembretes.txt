@@ -685,7 +685,34 @@ mod 05
 -----------------------------------------------------------------------------------------------------------------------------------
 
 ##  aprender formas diferentes de aplicar um middleware nas URLs, ->middleware(\App\Http\Middleware\Autenticador::class);, seja através do controller, de um grupo de rotas ou agrupando de outras formas
+## algunas vies não podem ser acessadas se não efetuar o login, como outras podem ser acessadas mas com limitição de acesso aos componentes dos botões.
+## como limitar o acesso de rotas como: http://localhost:8001/seasons/53/episodes
+uma das forma é inserir o middleware em cada rota
+Route::get('/seasons/{season}/episodes', [EpisodesController::class, 'index'])->name('episodes.index')->middleware(\App\Http\Middleware\Autenticador::class);
 
+## Só que existe outra forma de definir a utilização de um middleware, que é no controller em "app > Http > Controllers >SeriesController", dentro no controller se queremos aplicar um middleware a todos os métodos desse controller, 
+podemos usar o método middleware, então utilizando o autenticador todos os métodos desse controller vão antes passar por esse middleware, $this->middleware(Autenticador::class);.
+
+public function __construct(private SeriesRepository $repository)
+{
+    $this->middleware(Autenticador::class)->except('index');
+}
+
+## vamos passar o autenticador e agrupar todas essas rotas dentro da função, que vamos passar todas as definições de rotas que queremos que faça parte desse middleware.
+
+Route::middleware('autenticador')->group(function() {
+
+    Route::get('/', function () {
+        return redirect('/series');
+    });
+
+    Route::get('/series/{series}/seasons', [SeasonsController::class, 'index'])->name('seasons.index');
+
+    Route::get('/seasons/{season}/episodes', [EpisodesController::class, 'index'])->name('episodes.index');
+    Route::post('/seasons/{season}/episodes', [EpisodesController::class, 'update'])->name('episodes.update');
+
+
+});
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ================================================================================================================================================================================

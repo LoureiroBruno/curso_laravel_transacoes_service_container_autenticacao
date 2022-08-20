@@ -18,20 +18,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    // return view('welcome');
-    return redirect('/series');
-})->middleware(\App\Http\Middleware\Autenticador::class);
+
 
 /**
  * Grupo SerieController Recurso Route::Resource
  */
 Route::resource('/series', SeriesController::class)->except(['show']);
 
-Route::get('/series/{series}/seasons', [SeasonsController::class, 'index'])->name('seasons.index');
+Route::middleware('autenticador')->group(function() {
 
-Route::get('/seasons/{season}/episodes', [EpisodesController::class, 'index'])->name('episodes.index');
-Route::post('/seasons/{season}/episodes', [EpisodesController::class, 'update'])->name('episodes.update');
+    Route::get('/', function () {
+        return redirect('/series');
+    });
+
+    Route::get('/series/{series}/seasons', [SeasonsController::class, 'index'])->name('seasons.index');
+
+    Route::get('/seasons/{season}/episodes', [EpisodesController::class, 'index'])->name('episodes.index');
+    Route::post('/seasons/{season}/episodes', [EpisodesController::class, 'update'])->name('episodes.update');
+
+
+});
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('signin');
